@@ -45,7 +45,7 @@ class Tools:
         """
 
         emitter = EventEmitter(__event_emitter__)
-        pattern = re.compile(r'https\:\/\/www.youtube.com/watch\?v=[A-Za-z0-9]+')
+        pattern = re.compile(r'https\:\/\/www.youtube.com/watch\?v=[A-Za-z0-9_-]+')
         
         if not(bool(pattern.match(url))):
             await emitter.emit(
