@@ -36,8 +36,8 @@ class Tools:
         pass
 
     async def get_video_transcript(
-        self, url: str, 
-        __event_emitter__: Callable[[dict], Any] = None) -> str:
+        self, url: str, __event_emitter__: Callable[[dict], Any] = None
+    ) -> str:
         """
         Retrieves the transcript for a YouTube video given the video URL.
         :url: The URL of the YouTube video.
@@ -45,19 +45,19 @@ class Tools:
         """
 
         emitter = EventEmitter(__event_emitter__)
-        pattern = re.compile(r'https\:\/\/www.youtube.com/watch\?v=[A-Za-z0-9_-]+')
-        
-        if not(bool(pattern.match(url))):
+        pattern = re.compile(r"https\:\/\/www.youtube.com/watch\?v=[A-Za-z0-9_-]+")
+
+        if not (bool(pattern.match(url))):
             await emitter.emit(
                 status="error",
                 description=f"Wrong URL: {url}",
                 done=True,
             )
             return None
-        
+
         video_id = url.split("v=")[1]
-        
-        if not(video_id):
+
+        if not (video_id):
             await emitter.emit(
                 status="error",
                 description=f"Cannot get video ID from URL: {url}",
@@ -67,35 +67,11 @@ class Tools:
 
         await emitter.emit("Fetching video transcript")
         formatter = TextFormatter()
+        transcript = formatter.format_transcript(
+            YouTubeTranscriptApi.get_transcript(video_id, languages=["it", "en"])
+        )
 
-        # retrieve the available transcripts
-        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-        transcript_text = ''
-        
-        # iterate over all available transcripts
-        for transcript in transcript_list:
-            if transcript.language_code == 'it':
-                print(transcript.language)
-                transcript_text = formatter.format_transcript(transcript.fetch())
-                break
-        
-        if not(transcript_text):
-            for transcript in transcript_list:
-                if transcript.language_code == 'en':
-                    if transcript.is_translatable:
-                        language = ''
-                        for translation_language in transcript.translation_languages:
-                            if translation_language.language_code == 'it':
-                                language = translation_language.language_code
-                                break
-                        if language:
-                            transcript_text = formatter.format_transcript(transcript.translate(language).fetch())
-                        else:
-                            transcript_text = formatter.format_transcript(transcript.fetch())
-                    else:
-                        transcript_text = formatter.format_transcript(transcript.fetch())
-        
-        if not(transcript_text):
+        if not (transcript):
             await emitter.emit(
                 status="error",
                 description="Transcript not found",
@@ -108,4 +84,4 @@ class Tools:
                 description="Transcript retrieved succesfully",
                 done=True,
             )
-            return transcript_text
+            return transcript
