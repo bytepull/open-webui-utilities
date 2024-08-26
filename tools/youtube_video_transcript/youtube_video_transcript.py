@@ -6,8 +6,8 @@ version: 1.0.0
 license: MIT
 """
 
+from math import e
 import re
-from pydantic import BaseModel, Field
 from typing import Callable, Any
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
@@ -45,7 +45,8 @@ class Tools:
         """
 
         emitter = EventEmitter(__event_emitter__)
-        pattern = re.compile(r"https\:\/\/www.youtube.com/watch\?v=[A-Za-z0-9_-]+")
+        pattern = re.compile(
+            r"https\:\/\/www.youtube.com/watch\?v=[A-Za-z0-9_-]+")
 
         if not (bool(pattern.match(url))):
             await emitter.emit(
@@ -66,22 +67,27 @@ class Tools:
             return None
 
         await emitter.emit("Fetching video transcript")
-        formatter = TextFormatter()
-        transcript = formatter.format_transcript(
-            YouTubeTranscriptApi.get_transcript(video_id, languages=["it", "en"])
-        )
 
-        if not (transcript):
-            await emitter.emit(
-                status="error",
-                description="Transcript not found",
-                done=True,
+        formatter = TextFormatter()
+
+        transcript = "video transcript not found"
+
+        try:
+            transcript = formatter.format_transcript(
+                YouTubeTranscriptApi.get_transcript(
+                    video_id, languages=["it", "en"])
             )
-            return None
-        else:
             await emitter.emit(
                 status="complete",
                 description="Transcript retrieved succesfully",
                 done=True,
             )
+        except Exception as e:
+            print(e)
+            await emitter.emit(
+                status="error",
+                description="Transcript not found",
+                done=True,
+            )
+        finally:
             return transcript
