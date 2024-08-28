@@ -14,7 +14,7 @@ from youtube_transcript_api.formatters import TextFormatter
 
 
 class EventEmitter:
-    def __init__(self, event_emitter: Callable[[dict], Any]):
+    def __init__(self, event_emitter: Callable[[dict], Any] = None):
         self.event_emitter = event_emitter
 
     async def emit(self, description="Unknown State", status="in_progress", done=False):
@@ -36,7 +36,7 @@ class Tools:
         pass
 
     async def get_video_transcript(
-        self, url: str, __event_emitter__: Callable[[dict], Any]
+        self, url: str, __event_emitter__: Callable[[dict], Any] = None
     ) -> str:
         """
         Retrieves the transcript for a YouTube video given the video URL.
