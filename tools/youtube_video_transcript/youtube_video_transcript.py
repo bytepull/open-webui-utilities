@@ -6,7 +6,6 @@ version: 1.0.0
 license: MIT
 """
 
-from math import e
 import re
 from typing import Callable, Any
 from youtube_transcript_api import YouTubeTranscriptApi
